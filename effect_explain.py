@@ -1,47 +1,73 @@
 from console_printer import print_by_indent as pbi
+import explain_table as ex_table
 import re
 
 test_list = [
+    '			local temp = 0',
+    '			local temp2 = 0',
+    '			temp = get(11)',
+    '			SetEquipTempValue(0, temp)',
+    '			temp2 = math.floor(temp / 10)',
     '			AddReceiveItem_Equip(7)',
     '			AddEXPPercent_KillRace(9999, 15)',
     '			RaceAddDamage(0, 10)',
+    '			AddMdamage_Race(3, 10)',
+    '			AddDamage_Size(1, 0, 10)',
+    '			AddDamage_Size(1, 1, 10)',
+    '			AddDamage_Size(1, 2, 10)',
+    '			AddMDamage_Size(1, 0, 10)',
+    '			AddMDamage_Size(1, 1, 10)',
+    '			AddMDamage_Size(1, 2, 10)',
+    '			if temp2 > 20 then',
+    '				temp2 = 20',
+    '			end',
+    '			AddExtParam(0, 47, temp2 * 1)',
+    '			AddExtParam(0, 45, temp2 * 3)',
+    '			AddExtParam(0, 41, temp2 * 10)',
 ]
 
-patterns = [
-    (
-        r'(.*?)RaceAddDamage\((\d+),\s*(-?\d+)\)',
-        lambda indent, race, value: f"{indent}對 {race}種族 的物理傷害 {'+' if int(value) >= 0 else '-'} {abs(int(value))}%"
-    ),
-    (
-        r'(.*?)AddReceiveItem_Equip\((\d+)\)',
-        lambda indent, value: f"{indent}掉寶率 {'+' if int(value) >= 0 else '-'} {abs(int(value))}%"
-    ),
-    (
-        r'(.*?)AddEXPPercent_KillRace\((\d+),\s*(-?\d+)\)',
-        lambda indent, race, value: f"{indent}打倒 {race}種族 取得的經驗值 {'+' if int(value) >= 0 else '-'} {abs(int(value))}%"
-    ),
-]
-
-def convert_line(line):
-    for pattern, formatter in patterns:
+def explain_line(line):
+    for pattern, formatter in ex_table.regex_patterns:
         m = re.search(pattern, line)
         if m:
             groups = m.groups()
-            return formatter(*groups)
+            return replace_key_word(formatter(*groups)) + '\n', True
 
-    return line
+    return replace_key_word(line), False
 
-def line_effect_explain(input_line, output_vestion=0):
-    # Output Version 0: 只輸出轉換後的字句
-    # Output Version 1: 輸出轉換前與轉換後的字句
-    for pattern, formatter in patterns:
-        m = re.search(pattern, input_line)
-        if m:
-            groups = m.groups()
-            return formatter(*groups)
+def replace_key_word(input_line: str):
+    for key in ex_table.ext_param_table:
+        input_line = input_line.replace(key, ex_table.ext_param_table[key])
 
+    for key in ex_table.get_table:
+        input_line = input_line.replace(key, ex_table.get_table[key])
+
+    for key in ex_table.class_table:
+        input_line = input_line.replace(key, ex_table.class_table[key])
+
+    for key in ex_table.size_table:
+        input_line = input_line.replace(key, ex_table.size_table[key])
+
+    for key in ex_table.element_table:
+        input_line = input_line.replace(key, ex_table.element_table[key])
+
+    for key in ex_table.race_table:
+        input_line = input_line.replace(key, ex_table.race_table[key])
+    
     return input_line
 
-for item in test_list:
-    print(convert_line(item))
+def effect_explain(
+        file_path,
+        input_file_name,
+        output_file_name='ExplainedCompareResult.txt'):
+    
+    output_file = open(file_path + output_file_name, 'w', encoding='utf-8')
+    for line in open(file_path + input_file_name, 'r', encoding='utf-8').readlines():
+        explained_line, existPattern = explain_line(line)
 
+        if existPattern:
+            output_file.write(explained_line)
+
+        else:
+            output_file.write(line)
+    output_file.close()

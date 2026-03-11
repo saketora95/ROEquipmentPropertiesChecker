@@ -11,6 +11,7 @@ import os
 import datetime
 import file
 import different_process as diff
+import effect_explain
 
 DEFAULT_FILE_NAME = 'equipmentproperties.txt'
 DATETIME_TEXT = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
@@ -65,7 +66,7 @@ indent_number -= 1
 #region 進行資料註釋
 pbi(indent_number, '# 進行資料註釋')
 indent_number += 1
-
+effect_explain.effect_explain(OUTPUT_PATH, 'RawCompareResult.txt', 'ExplainedCompareResult.txt')
 pbi(indent_number, '- 進行資料註釋 : 完成\n')
 indent_number -= 1
 #endregion
