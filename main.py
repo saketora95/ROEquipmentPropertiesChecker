@@ -1,13 +1,6 @@
 from console_printer import print_by_indent as pbi
-
-indent_number = 0
-pbi(indent_number, '# 程式開始執行')
-
-indent_number += 1
-pbi(indent_number, '- 程式正常執行時，視窗不會主動關閉。')
-pbi(indent_number, '- 若視窗突然消失，表示有地方執行失敗而導致程式自動關閉。\n')
-
 import os
+import sys
 import datetime
 import file
 import different_process as diff
@@ -16,9 +9,18 @@ import effect_explain
 DEFAULT_FILE_NAME = 'equipmentproperties.txt'
 DATETIME_TEXT = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
 EXECUTE_PATH = os.path.abspath(os.path.dirname(__file__)) + '\\'
+if getattr(sys, 'frozen', False):
+    EXECUTE_PATH = os.path.dirname(sys.executable) + '\\'
 INPUT_PATH = EXECUTE_PATH + 'Input\\'
 TEMP_PATH = EXECUTE_PATH + 'Temp\\'
 OUTPUT_PATH = EXECUTE_PATH + 'Output\\'
+
+indent_number = 0
+pbi(indent_number, '# 程式開始執行')
+
+indent_number += 1
+pbi(indent_number, '- 程式正常執行時，視窗不會主動關閉。')
+pbi(indent_number, '- 若視窗突然消失，表示有地方執行失敗而導致程式自動關閉。\n')
 
 #region 建置必要目錄
 pbi(indent_number, '# 建置必要目錄')
@@ -94,3 +96,5 @@ indent_number -= 1
 
 indent_number = 0
 pbi(indent_number, '# 程式結束執行')
+
+os.system('pause')

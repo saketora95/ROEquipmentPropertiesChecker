@@ -3,3 +3,6 @@ Output/*
 Temp/*
 Dev/*
 __pycache__/*
+build/*
+dist/*
+main.spec

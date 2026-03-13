@@ -6,10 +6,10 @@
 2. 使用上述軟體，將 `equipmentproperties` 檔案以 `txt` 格式輸出
     - 原本慣用的 lub 轉 lua 工具可能因為太舊了，沒辦法正確轉換 `equipmentproperties` 檔案。
     - 一時之間我也沒找到新版本的轉換工具，所以此處一律以 `GRF Editor` 等工具手動處理。
-3. 在 `main.py` 所在的目錄中，建立 `Input` 資料夾，並將前一步驟得到的 `equipmentproperties.txt` 放入。
+3. 在 `main.py` 或 `ROEquipmentPropertiesChecker.exe` 所在的目錄中，建立 `Input` 資料夾，並將前一步驟得到的 `equipmentproperties.txt` 放入。
 
 # 操作流程
-1. 執行 `main.py`
+1. 執行 `main.py` 或 `ROEquipmentPropertiesChecker.exe`
 2. 沒了
 
 執行時 `Input/equipmentproperties.txt` 會以當下的電腦時間命名，複製一份相同檔案至 `Temp/` 當中；若 `Temp/` 底下包含 `5` 份以上的檔案，會先進行一次整理，把較舊的檔案移除。
@@ -25,4 +25,5 @@
 ## `ExplainedCompareResult.txt` (實驗性功能)
 基於 Regex 的判斷，進行局部的功能註釋以利使用者較容易閱讀。
 
-不過內容中仍有很多 Regex 尚未建置或不明原文語法的意義，因此僅是個實驗性功能。
+由於是人工比對資料和可能的效果，所以這邊錯誤的可能性較高，最好是參照原檔 `equipmentproperties` 與出現過的裝備比對。
+例如新裝備有 `SubAttrTolerace(8, 20)` 的效果，可以去找尋有哪件裝備也帶有這個效果，以得到正確的功能解釋。
