@@ -2,37 +2,46 @@ from console_printer import print_by_indent as pbi
 import explain_table as ex_table
 import re
 
-test_list = [
-    '			local temp = 0',
-    '			local temp2 = 0',
-    '			temp = get(11)',
-    '			SetEquipTempValue(0, temp)',
-    '			temp2 = math.floor(temp / 10)',
-    '			AddReceiveItem_Equip(7)',
-    '			AddEXPPercent_KillRace(9999, 15)',
-    '			RaceAddDamage(0, 10)',
-    '			AddMdamage_Race(3, 10)',
-    '			AddDamage_Size(1, 0, 10)',
-    '			AddDamage_Size(1, 1, 10)',
-    '			AddDamage_Size(1, 2, 10)',
-    '			AddMDamage_Size(1, 0, 10)',
-    '			AddMDamage_Size(1, 1, 10)',
-    '			AddMDamage_Size(1, 2, 10)',
-    '			if temp2 > 20 then',
-    '				temp2 = 20',
-    '			end',
-    '			AddExtParam(0, 47, temp2 * 1)',
-    '			AddExtParam(0, 45, temp2 * 3)',
-    '			AddExtParam(0, 41, temp2 * 10)',
-]
+CALL_PATTERN = re.compile(r'^(\s*)([A-Za-z_]\w*)\((.*)\)\s*$', re.DOTALL)
 
-def explain_line(line):
-    for pattern, formatter in ex_table.regex_patterns:
-        m = re.search(pattern, line)
-        if m:
-            groups = m.groups()
-            return replace_key_word(formatter(*groups)) + '\n', True
+def split_args(args_str: str) -> list[str]:
+    """
+    按頂層逗號分割參數字串，正確處理巢狀括號。
+    e.g. "0, 5 + (temp - 5)" → ["0", "5 + (temp - 5)"]
+    """
+    args, current, depth = [], [], 0
+    for ch in args_str:
+        if ch == '(':
+            depth += 1
+        elif ch == ')':
+            depth -= 1
+        if ch == ',' and depth == 0:
+            args.append(''.join(current).strip())
+            current = []
+        else:
+            current.append(ch)
+    if current:
+        args.append(''.join(current).strip())
+    return args
 
+def parse_function_call(line: str):
+    """正確辨識一行函式呼叫，回傳 (indent, func_name, args) 或 None"""
+    m = CALL_PATTERN.match(line.rstrip())
+    if not m:
+        return None
+    indent, name, args_raw = m.group(1), m.group(2), m.group(3)
+    return indent, name, split_args(args_raw)
+
+def explain_line(line: str):
+    result = parse_function_call(line)
+    if result:
+        indent, name, args = result
+        handler = ex_table.function_handlers.get(name)
+        if handler:
+            raw = handler(indent, args)
+            return replace_key_word(raw) + '\n', True
+
+    # 沒有 handler 就走舊路（控制流、賦值等）
     return replace_key_word(line), False
 
 def replace_key_word(input_line: str):
@@ -71,3 +80,17 @@ def effect_explain(
         else:
             output_file.write(line)
     output_file.close()
+
+import os
+
+DEFAULT_FILE_NAME = 'equipmentproperties.txt'
+EXECUTE_PATH = os.path.abspath(os.path.dirname(__file__)) + '\\'
+INPUT_PATH = EXECUTE_PATH + 'Input\\'
+TEMP_PATH = EXECUTE_PATH + 'Temp\\'
+OUTPUT_PATH = EXECUTE_PATH + 'Output\\'
+DEV_PATH = EXECUTE_PATH + 'Dev\\'
+
+dev_result = open(DEV_PATH + 'Result.txt', 'w', encoding='utf-8')
+for line in open(INPUT_PATH + DEFAULT_FILE_NAME, 'r', encoding='utf-8').readlines():
+    result, pattern = explain_line(line)
+    dev_result.write(result)
