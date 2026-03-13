@@ -80,17 +80,3 @@ def effect_explain(
         else:
             output_file.write(line)
     output_file.close()
-
-import os
-
-DEFAULT_FILE_NAME = 'equipmentproperties.txt'
-EXECUTE_PATH = os.path.abspath(os.path.dirname(__file__)) + '\\'
-INPUT_PATH = EXECUTE_PATH + 'Input\\'
-TEMP_PATH = EXECUTE_PATH + 'Temp\\'
-OUTPUT_PATH = EXECUTE_PATH + 'Output\\'
-DEV_PATH = EXECUTE_PATH + 'Dev\\'
-
-dev_result = open(DEV_PATH + 'Result.txt', 'w', encoding='utf-8')
-for line in open(INPUT_PATH + DEFAULT_FILE_NAME, 'r', encoding='utf-8').readlines():
-    result, pattern = explain_line(line)
-    dev_result.write(result)
